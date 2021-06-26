@@ -3,7 +3,7 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+require("dotenv").config();
 const morgan = require("morgan");
 
 // const mentorRouter = require("./routes/mentors");
@@ -12,6 +12,25 @@ const userRouter = require("./routes/users");
 const postRouter = require("./routes/posts");
 
 const app = express();
+
+const { auth } = require("express-openid-connect");
+
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: "a long, randomly-generated string stored in env",
+  baseURL: "http://localhost:3000",
+  clientID: "jOrqkvv11u1YCZbd0Wbn8UXQj3nyMjyM",
+  issuerBaseURL: "https://dev-yvm0dudd.us.auth0.com",
+};
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
+
+// req.isAuthenticated is provided from the auth router
+app.get("/login", (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
+});
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
