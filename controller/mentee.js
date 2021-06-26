@@ -1,4 +1,4 @@
-const Mentees = require("../model/mentees");
+const Mentees = require("../model/mentee");
 
 exports.getAllMentees = async (req, res) => {
   try {
@@ -24,11 +24,17 @@ exports.getMentee = async (req, res) => {
   }
 };
 
-exports.createMentee = (req, res) => {
-  res.status(200).json({
-    status: "success",
-    results: 100,
-  });
+exports.createMentee = async (req, res) => {
+  try {
+    const newMentee = await Mentees.create(req.body);
+
+    res.status(201).json({
+      status: "success",
+      newMentee,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 exports.deleteMentee = async (req, res) => {

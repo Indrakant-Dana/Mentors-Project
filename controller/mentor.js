@@ -1,4 +1,4 @@
-const Mentors = require("../model/Mentors");
+const Mentors = require("../model/mentor");
 
 exports.getAllMentors = async (req, res) => {
   try {
@@ -24,11 +24,16 @@ exports.getMentor = async (req, res) => {
   }
 };
 
-exports.createMentor = (req, res) => {
-  res.status(200).json({
-    status: "success",
-    results: 100,
-  });
+exports.createMentor = async (req, res) => {
+  try {
+    const newMentor = await Mentors.create(req.body);
+    res.status(201).json({
+      status: "success",
+      newMentor,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 exports.deleteMentor = async (req, res) => {

@@ -1,110 +1,179 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const {ObjectId} = mongoose.Schema.Types;
+// //
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please tell us your name"],
-  },
-  email: {
-    type: String,
-    required: [true, "Please provide your email"],
-    unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, "Please provied a valid email"],
-  },
-  photo: {
-    type: String,
-    default: "default.jpg",
-  },
-  role: {
-    type: String,
-    enum: ["mentor", "mentee"],
-    default: "mentee",
-  },
-  domain: {
-    type: String,
-    required: [true, "Please provide your Field"],
-  },
-  password: {
-    type: String,
-    required: [true, "Please provied a password"],
-    minlength: 8,
-    select: false,
-  },
-  passwordConfirm: {
-    type: String,
-    required: [true, "Please confirm your password"],
-    validate: {
-      // This only works on CREATE and SAVE!!
-      validator: function (el) {
-        return el === this.password;
-      },
-      message: "Passwords are not the same!",
-    },
-  },
-  followers: [{ type: ObjectId, ref: "User" }],
-  following: [{ type: ObjectId, ref: "User" }],
-});
+// function login(email, password, callback) {
+//   const bcrypt = require("bcrypt");
+//   const MongoClient = require("mongodb@3.1.4").MongoClient;
+//   const client = new MongoClient(
+//     "mongodb+srv://priyaraj:ananya17@cluster0.egr8p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+//   );
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+//   client.connect(function (err) {
+//     if (err) return callback(err);
 
-  this.password = await bcrypt.hash(this.password, 12);
-  this.passwordConfirm = undefined;
-  next();
-});
+//     const db = client.db("db-name");
+//     const users = db.collection("users");
 
-userSchema.methods.correctPassword = async function (
-  candidatePasssword,
-  userPassword
-) {
-  return await bcrypt.compare(candidatePasssword, userPassword);
-};
+//     users.findOne({ email: email }, function (err, user) {
+//       if (err || !user) {
+//         client.close();
+//         return callback(err || new WrongUsernameOrPasswordError(email));
+//       }
 
-// const menteeSchema = new mongoose.Schema({
-//   currentMentors: {
-//     type: Array,
-//   },
-//   college: {
-//     Type: String,
-//     required: [true, "Please specify your college"],
-//   },
-//   year_of_study: {
-//     Type: String,
-//     required: [true, "Please specify your year of study"],
-//   },
-//   Branch: {
-//     Type: String,
-//     required: [true, "Please specify your branch"],
-//   },
-// });
+//       bcrypt.compare(password, user.password, function (err, isValid) {
+//         client.close();
 
-// const mentorSchema = new mongoose.Schema({
-//   currentMentees: {
-//     type: Array,
-//   },
-//   college: {
-//     Type: String,
-//     required: [true, "Please specify your college"],
-//   },
-//   year_of_study: {
-//     Type: String,
-//     required: [true, "Please specify your year of study"],
-//   },
-//   Branch: {
-//     Type: String,
-//     required: [true, "Please specify your branch"],
-//   },
-//   rating: Number,
-// });
+//         if (err || !isValid)
+//           return callback(err || new WrongUsernameOrPasswordError(email));
 
-// const User = mongoose.model("User", usersSchema, "users");
-// User.Mentee = mongoose.model("Mentee", menteesSchema, "users");
-// User.Mentor = mongoose.model("Mentor", mentorsSchema, "users");
+//         return callback(null, {
+//           user_id: user._id.toString(),
+//           nickname: user.nickname,
+//           email: user.email,
+//         });
+//       });
+//     });
+//   });
+// }
 
-const User = mongoose.model("User", userSchema);
+// function create(user, callback) {
+//   const bcrypt = require("bcrypt");
+//   const MongoClient = require("mongodb@3.1.4").MongoClient;
+//   const client = new MongoClient(
+//     "mongodb+srv://priyaraj:ananya17@cluster0.egr8p.mongodb.net/?retryWrites=true&w=majority"
+//   );
 
-module.exports = User;
+//   client.connect(function (err) {
+//     if (err) return callback(err);
+
+//     const db = client.db("db-name");
+//     const users = db.collection("users");
+
+//     users.findOne({ email: user.email }, function (err, withSameMail) {
+//       if (err || withSameMail) {
+//         client.close();
+//         return callback(err || new Error("the user already exists"));
+//       }
+
+//       bcrypt.hash(user.password, 10, function (err, hash) {
+//         if (err) {
+//           client.close();
+//           return callback(err);
+//         }
+
+//         user.password = hash;
+//         users.insert(user, function (err, inserted) {
+//           client.close();
+
+//           if (err) return callback(err);
+//           callback(null);
+//         });
+//       });
+//     });
+//   });
+// }
+
+// function verify(email, callback) {
+//   const MongoClient = require("mongodb@3.1.4").MongoClient;
+//   const client = new MongoClient(
+//     "mongodb+srv://priyaraj:ananya17@cluster0.egr8p.mongodb.net/?retryWrites=true&w=majority"
+//   );
+
+//   client.connect(function (err) {
+//     if (err) return callback(err);
+
+//     const db = client.db("db-name");
+//     const users = db.collection("users");
+//     const query = { email: email, email_verified: false };
+
+//     users.update(
+//       query,
+//       { $set: { email_verified: true } },
+//       function (err, count) {
+//         client.close();
+
+//         if (err) return callback(err);
+//         callback(null, count > 0);
+//       }
+//     );
+//   });
+// }
+
+// function changePassword(email, newPassword, callback) {
+//   const bcrypt = require("bcrypt");
+//   const MongoClient = require("mongodb@3.1.4").MongoClient;
+//   const client = new MongoClient(
+//     "mongodb+srv://priyaraj:ananya17@cluster0.egr8p.mongodb.net/?retryWrites=true&w=majority"
+//   );
+
+//   client.connect(function (err) {
+//     if (err) return callback(err);
+
+//     const db = client.db("db-name");
+//     const users = db.collection("users");
+
+//     bcrypt.hash(newPassword, 10, function (err, hash) {
+//       if (err) {
+//         client.close();
+//         return callback(err);
+//       }
+
+//       users.update(
+//         { email: email },
+//         { $set: { password: hash } },
+//         function (err, count) {
+//           client.close();
+//           if (err) return callback(err);
+//           callback(null, count > 0);
+//         }
+//       );
+//     });
+//   });
+// }
+
+// function getByEmail(email, callback) {
+//   const MongoClient = require("mongodb@3.1.4").MongoClient;
+//   const client = new MongoClient(
+//     "mongodb+srv://priyaraj:ananya17@cluster0.egr8p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+//   );
+
+//   client.connect(function (err) {
+//     if (err) return callback(err);
+
+//     const db = client.db("db-name");
+//     const users = db.collection("users");
+
+//     users.findOne({ email: email }, function (err, user) {
+//       client.close();
+
+//       if (err) return callback(err);
+//       if (!user) return callback(null, null);
+
+//       return callback(null, {
+//         user_id: user._id.toString(),
+//         nickname: user.nickname,
+//         email: user.email,
+//       });
+//     });
+//   });
+// }
+
+// function remove(id, callback) {
+//   const MongoClient = require("mongodb@3.1.4").MongoClient;
+//   const client = new MongoClient(
+//     "mongodb+srv://priyaraj:ananya17@cluster0.egr8p.mongodb.net/?retryWrites=true&w=majority"
+//   );
+
+//   client.connect(function (err) {
+//     if (err) return callback(err);
+
+//     const db = client.db("db-name");
+//     const users = db.collection("users");
+
+//     users.remove({ _id: id }, function (err) {
+//       client.close();
+
+//       if (err) return callback(err);
+//       callback(null);
+//     });
+//   });
+// }

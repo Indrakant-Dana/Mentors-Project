@@ -6,8 +6,8 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const morgan = require("morgan");
 
-// const mentorRouter = require("./routes/mentors");
-// const menteeRouter = require("./routes/mentees");
+const mentorRouter = require("./routes/mentors");
+const menteeRouter = require("./routes/mentee");
 const userRouter = require("./routes/users");
 const postRouter = require("./routes/posts");
 
@@ -28,7 +28,7 @@ const config = {
 app.use(auth(config));
 
 // req.isAuthenticated is provided from the auth router
-app.get("/login", (req, res) => {
+app.get("/", (req, res) => {
   res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
 });
 
@@ -47,9 +47,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.use("/api/v1/mentors", mentorRouter);
-// app.use("/api/v1/mentees", menteeRouter);
-
+app.use("/api/v1/mentors", mentorRouter);
+app.use("/api/v1/mentees", menteeRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/posts", postRouter);
 module.exports = app;
